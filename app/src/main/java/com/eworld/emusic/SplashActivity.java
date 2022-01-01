@@ -1,9 +1,14 @@
 package com.eworld.emusic;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.eworld.emusic.utils.LUtil;
+import com.eworld.emusic.utils.PermissionHelper;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -12,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity;
  * 2021/12/23
  */
 public class SplashActivity extends AppCompatActivity {
+    private static final String TAG = "SplashActivity";
+    private PermissionHelper mPermissionHelper;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -23,5 +30,40 @@ public class SplashActivity extends AppCompatActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_splash);
 
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mPermissionHelper = new PermissionHelper(this);
+            mPermissionHelper.setApplyPermissionListener(new PermissionHelper.OnApplyPermissionListener() {
+                @Override
+                public void onAfterApplyPermission() {
+                    openMain();
+                }
+            });
+            if (mPermissionHelper.isApplyAllPermission()) {
+                LUtil.d(TAG,">>>>>>> 999");
+                openMain();
+            } else {
+                // TODO: 2021/12/23
+                mPermissionHelper.applyPermissions();
+            }
+
+        } else {
+            openMain();
+
+        }
     }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        mPermissionHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    private void openMain() {
+        MainActivity.startActivity(this);
+
+    }
+
+
 }
